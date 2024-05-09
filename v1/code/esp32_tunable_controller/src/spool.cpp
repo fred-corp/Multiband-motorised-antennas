@@ -98,3 +98,9 @@ void Spool::singleStep(int delay) {
   digitalWrite(this->step_pin, LOW);
   delayMicroseconds(delay);
 }
+
+// Destructor
+Spool::~Spool() {
+  delete this->driver;
+}
+
