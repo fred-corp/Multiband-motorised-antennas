@@ -13,8 +13,9 @@
 // ```uint16_t en_pin```    : enable pin
 // ```uint16_t stall_pin``` : stall pin
 Spool::Spool(uint16_t cs_pin, float r_sense, uint16_t sw_mosi, uint16_t sw_miso, uint16_t sw_sck, uint16_t step_pin, uint16_t dir_pin, uint16_t en_pin, uint16_t stall_pin) {
-  this->spoolDiameter = 100;     // defaults to 100mm
+  this->spoolDiameter = 100;    // defaults to 100mm
   this->spoolWidth = 20;        // defaults to 20mm
+  this->stepsPerRevolution = 51200;       // 200 * 256 = 51200
   this->driver = new TMC2130Stepper(cs_pin, r_sense, sw_mosi, sw_miso, sw_sck);
   this->step_pin = step_pin;
   this->dir_pin = dir_pin;
@@ -84,6 +85,18 @@ float Spool::getWidth() {
   return this->spoolWidth;
 }
 
+// Set the steps per revolution of the stepper
+// ```int steps``` : steps per revolution
+void Spool::setStepsPerRevolution(int steps) {
+  this->stepsPerRevolution = steps;
+}
+
+// Get the steps per revolution of the stepper
+// returns the steps per revolution of the stepper
+int Spool::getStepsPerRevolution() {
+  return this->stepsPerRevolution;
+}
+
 // Set the direction of the stepper
 // ```bool dir``` : direction (0 counter-clockwise, 1 clockwise)
 void Spool::setDir(bool dir) {
@@ -100,7 +113,40 @@ void Spool::singleStep(int delay) {
 }
 
 // Destructor
-Spool::~Spool() {
+void Spool::end() {
   delete this->driver;
 }
 
+// Set the speed of the spool
+// ```int speed``` : speed r/s
+void Spool::setSpeed(float speed) {
+  this->speedDelay = int((1000000 / (speed * this->stepsPerRevolution))/2);
+}
+
+// Set the acceleration of the spool
+// ```int acceleration``` : acceleration in mm/s^2
+void Spool::setAcceleration(int acceleration) {
+  // TODO : implement acceleration
+}
+
+// Rotate the spool by a number of steps
+// ```int steps``` : steps to rotate
+void Spool::rotateSteps(int steps) {
+  for (int i = 0; i < steps; i++) {
+    this->singleStep(this->speedDelay);
+  }
+}
+
+// Rotate the spool by a number of degrees
+// ```float degrees``` : degrees to rotate
+void Spool::rotateDegrees(float degrees) {
+  float steps = degrees * (this->stepsPerRevolution / 360);
+  this->rotateSteps(steps);
+}
+
+// Rotate the spool by a distance
+// ```float distance``` : distance to rotate
+void Spool::rotateDistance(float distance) {
+  float steps = distance * (this->stepsPerRevolution / (this->spoolDiameter * PI));
+  this->rotateSteps(steps);
+}

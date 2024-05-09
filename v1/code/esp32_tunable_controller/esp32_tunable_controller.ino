@@ -54,11 +54,10 @@ void setup() {
   Serial.println(spool->testConnection());
 
   spool->setDir(0); // 0 counter-clockwise, 1 clockwise
+  spool->setSpeed(1);
 }
 
 void loop() {
-  for (int i = 0; i < fullTurn; i++) {
-    spool->singleStep(25);
-  }
+  spool->rotateDegrees(360);
   delay(1000);
 }
