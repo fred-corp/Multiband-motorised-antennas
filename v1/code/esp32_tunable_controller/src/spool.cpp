@@ -3,6 +3,8 @@
 #include "spool.h"
 
 Spool::Spool(TMC2130Stepper *driver, char step_pin, char dir_pin, char en_pin, char stall_pin) {
+  this->spoolDiameter = 100;     // defaults to 100mm
+  this->spoolWidth = 200;
   this->driver = driver;
   this->step_pin = step_pin;
   this->dir_pin = dir_pin;
@@ -38,6 +40,22 @@ uint32_t Spool::getDRVStatus() {
 
 uint8_t Spool::testConnection() {
   return this->driver->test_connection();
+}
+
+void Spool::setDiameter(float diameter) {
+  this->spoolDiameter = diameter;
+}
+
+float Spool::getDiameter() {
+  return this->spoolDiameter;
+}
+
+void Spool::setWidth(float width) {
+  this->spoolWidth = width;
+}
+
+float Spool::getWidth() {
+  return this->spoolWidth;
 }
 
 void Spool::setDir(bool dir) {

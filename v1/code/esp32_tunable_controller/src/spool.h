@@ -15,9 +15,15 @@ class Spool
     void disable();
     virtual uint32_t getDRVStatus();
     uint8_t testConnection();
+    void setDiameter(float diameter);
+    float getDiameter();
+    void setWidth(float width);
+    float getWidth();
     void setDir(bool dir);
     void singleStep(int delay);
   private:
+    float spoolDiameter;
+    float spoolWidth;
     TMC2130Stepper *driver;
     char step_pin;
     char dir_pin;
