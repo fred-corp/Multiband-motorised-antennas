@@ -8,7 +8,7 @@
 class Spool
 {
   public:
-    Spool(TMC2130Stepper *driver, char step_pin, char dir_pin, char en_pin, char stall_pin);
+    Spool(uint16_t cs_pin, float r_sense, uint16_t sw_mosi, uint16_t sw_miso, uint16_t sw_sck, uint16_t step_pin, uint16_t dir_pin, uint16_t en_pin, uint16_t stall_pin);
     void begin();
     void setCurrent(int current);
     void enable();
@@ -25,10 +25,10 @@ class Spool
     float spoolDiameter;
     float spoolWidth;
     TMC2130Stepper *driver;
-    char step_pin;
-    char dir_pin;
-    char en_pin;
-    char stall_pin;
+    uint16_t step_pin;
+    uint16_t dir_pin;
+    uint16_t en_pin;
+    uint16_t stall_pin;
 };
 
 #endif

@@ -14,14 +14,12 @@
  */
 
 
-// TODO : stepper motor control
 // TODO : dynamics handling (speedup, slowdown, ...)
 // TODO : homing/retract sequence
 // TODO : state machine
 // TODO : web interface
 // TODO : CAT protocol
 
-#include <TMCStepper.h>
 #include "./src/spool.h"
 
 #define EN_PIN           15
@@ -38,9 +36,7 @@
 
 #define fullTurn 51200 // 200 * 256 = 51200
 
-TMC2130Stepper driver = TMC2130Stepper(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK);
-
-Spool spool = Spool(&driver, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
+Spool spool = Spool(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
 
 bool dir = true;
 
@@ -57,7 +53,7 @@ void setup() {
   Serial.print("DRV conn test = ");
   Serial.println(spool.testConnection());
 
-  driver.shaft(0); // 0 counter-clockwise, 1 clockwise
+  spool.setDir(0); // 0 counter-clockwise, 1 clockwise
 }
 
 void loop() {

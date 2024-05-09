@@ -2,10 +2,10 @@
 #include <TMCStepper.h>
 #include "spool.h"
 
-Spool::Spool(TMC2130Stepper *driver, char step_pin, char dir_pin, char en_pin, char stall_pin) {
+Spool::Spool(uint16_t cs_pin, float r_sense, uint16_t sw_mosi, uint16_t sw_miso, uint16_t sw_sck, uint16_t step_pin, uint16_t dir_pin, uint16_t en_pin, uint16_t stall_pin) {
   this->spoolDiameter = 100;     // defaults to 100mm
   this->spoolWidth = 200;
-  this->driver = driver;
+  this->driver = new TMC2130Stepper(cs_pin, r_sense, sw_mosi, sw_miso, sw_sck);
   this->step_pin = step_pin;
   this->dir_pin = dir_pin;
   this->en_pin = en_pin;
