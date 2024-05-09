@@ -1,4 +1,4 @@
-# Multiband motorised dipole antenna
+# Multiband motorized antennas
 
 Dipole antennas you can use on multiple bands, with a motorised system to change the length of the elements.
 
