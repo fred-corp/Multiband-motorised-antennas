@@ -36,7 +36,7 @@
 
 #define fullTurn 51200 // 200 * 256 = 51200
 
-Spool spool = Spool(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
+Spool* spool = new Spool(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
 
 bool dir = true;
 
@@ -44,21 +44,21 @@ void setup() {
   Serial.begin(115200);
   while(!Serial);
   Serial.println("Starting");
-  spool.begin();
-  spool.setCurrent(1000);
-  spool.enable();
+  (*spool).begin(); // Dereference the spool pointer before calling the begin() function
+  spool->setCurrent(1000);
+  spool->enable();
 
   Serial.print("DRV_STATUS=0b");
-  Serial.println(spool.getDRVStatus(), BIN);
+  Serial.println(spool->getDRVStatus(), BIN);
   Serial.print("DRV conn test = ");
-  Serial.println(spool.testConnection());
+  Serial.println(spool->testConnection());
 
-  spool.setDir(0); // 0 counter-clockwise, 1 clockwise
+  spool->setDir(0); // 0 counter-clockwise, 1 clockwise
 }
 
 void loop() {
   for (int i = 0; i < fullTurn; i++) {
-    spool.singleStep(25);
+    spool->singleStep(25);
   }
   delay(1000);
 }
