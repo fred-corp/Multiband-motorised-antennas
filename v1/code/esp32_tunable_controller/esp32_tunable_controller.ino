@@ -22,6 +22,7 @@
 // TODO : CAT protocol
 
 #include <TMCStepper.h>
+#include "./src/spool.h"
 
 #define EN_PIN           15
 #define DIR_PIN          32
@@ -39,35 +40,29 @@
 
 TMC2130Stepper driver = TMC2130Stepper(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK);
 
+Spool spool = Spool(&driver, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
+
 bool dir = true;
 
 void setup() {
   Serial.begin(115200);
   while(!Serial);
   Serial.println("Starting");
-  driver.begin();
-  driver.rms_current(1000); 
-  driver.en_pwm_mode(1);
-
-
-  pinMode(EN_PIN, OUTPUT);
-  pinMode(STEP_PIN, OUTPUT);
-  digitalWrite(EN_PIN, LOW);
+  spool.begin();
+  spool.setCurrent(1000);
+  spool.enable();
 
   Serial.print("DRV_STATUS=0b");
-  Serial.println(driver.DRV_STATUS(), BIN);
+  Serial.println(spool.getDRVStatus(), BIN);
   Serial.print("DRV conn test = ");
-  Serial.println(driver.test_connection());
+  Serial.println(spool.testConnection());
 
   driver.shaft(0); // 0 counter-clockwise, 1 clockwise
 }
 
 void loop() {
   for (int i = 0; i < fullTurn; i++) {
-    digitalWrite(STEP_PIN, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(STEP_PIN, LOW);
-    delayMicroseconds(10);
+    spool.singleStep(25);
   }
   delay(1000);
 }
