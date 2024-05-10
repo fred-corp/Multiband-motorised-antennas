@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <TMCStepper.h>
+#include <AccelStepper.h>
 
 
 class Spool
@@ -26,21 +27,24 @@ class Spool
     void singleStep(int delay);
     void setSpeed(float speed);
     void setAcceleration(int acceleration);
-    void rotateSteps(int steps);
-    void rotateDegrees(float degrees);
-    void rotateDistance(float distance);
+    void rotateSteps(int steps, bool accel = true);
+    void rotateDegrees(float degrees, bool accel = true);
+    void rotateDistance(float distance, bool accel = true);
   private:
     float spoolDiameter;
     float spoolWidth;
     int stepsPerRevolution;
     TMC2130Stepper *driver;
+    AccelStepper *stepper;
     uint16_t step_pin;
     uint16_t dir_pin;
     uint16_t en_pin;
     uint16_t stall_pin;
     bool dir;
+    int speed;
     int speedDelay;
-    int acceleration;
+    float acceleration;
+    int startDelay;
 };
 
 #endif

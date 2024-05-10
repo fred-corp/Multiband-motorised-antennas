@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <TMCStepper.h>
+#include <AccelStepper.h>
 #include "spool.h"
 
 // Constructor
@@ -15,12 +16,14 @@
 Spool::Spool(uint16_t cs_pin, float r_sense, uint16_t sw_mosi, uint16_t sw_miso, uint16_t sw_sck, uint16_t step_pin, uint16_t dir_pin, uint16_t en_pin, uint16_t stall_pin) {
   this->spoolDiameter = 100;    // defaults to 100mm
   this->spoolWidth = 20;        // defaults to 20mm
-  this->stepsPerRevolution = 51200;       // 200 * 256 = 51200
+  this->stepsPerRevolution = 1600;       // 200 * 8 = 800
+  this->startDelay = 1000;      // start acceleration from 1000us
   this->driver = new TMC2130Stepper(cs_pin, r_sense, sw_mosi, sw_miso, sw_sck);
   this->step_pin = step_pin;
   this->dir_pin = dir_pin;
   this->en_pin = en_pin;
   this->stall_pin = stall_pin;
+  this->stepper = new AccelStepper(AccelStepper::DRIVER, this->step_pin, this->dir_pin);
 }
 
 // Initialize the spool
@@ -32,6 +35,15 @@ void Spool::begin() {
   pinMode(this->dir_pin, OUTPUT);
   pinMode(this->en_pin, OUTPUT);
   pinMode(this->stall_pin, INPUT);
+
+  this->driver->microsteps(8);
+
+  this->stepper->setMaxSpeed(2000);
+  this->stepper->setSpeed(1600);
+  this->stepper->setAcceleration(1600);
+  this->stepper->setEnablePin(this->en_pin);
+  this->stepper->setPinsInverted(false, false, true);
+  this->stepper->enableOutputs();
 }
 
 // Set current of the stepper
@@ -42,12 +54,12 @@ void Spool::setCurrent(int current) {
 
 // Enable the stepper
 void Spool::enable() {
-  digitalWrite(this->en_pin, LOW);
+  this->stepper->enableOutputs();
 }
 
 // Disable the stepper
 void Spool::disable() {
-  digitalWrite(this->en_pin, HIGH);
+  this->stepper->disableOutputs();
 }
 
 // Get the raw status of the driver
@@ -118,35 +130,45 @@ void Spool::end() {
 }
 
 // Set the speed of the spool
-// ```int speed``` : speed r/s
+// ```int speed``` : speed rpm
 void Spool::setSpeed(float speed) {
-  this->speedDelay = int((1000000 / (speed * this->stepsPerRevolution))/2);
+  this->speed = speed;
+  this->stepper->setSpeed((this->speed/60) * (this->stepsPerRevolution/64));
+  this->speedDelay = int(((speed * 1000000) / (60 * this->stepsPerRevolution))/2);
 }
 
 // Set the acceleration of the spool
-// ```int acceleration``` : acceleration in mm/s^2
+// ```int acceleration``` : acceleration in rps^2
 void Spool::setAcceleration(int acceleration) {
-  // TODO : implement acceleration
+  this->acceleration = (this->stepsPerRevolution/64) / acceleration;
+  this->stepper->setAcceleration(this->acceleration);
 }
 
 // Rotate the spool by a number of steps
 // ```int steps``` : steps to rotate
-void Spool::rotateSteps(int steps) {
-  for (int i = 0; i < steps; i++) {
-    this->singleStep(this->speedDelay);
+// ```bool accel``` : whether to accelerate or not
+void Spool::rotateSteps(int steps, bool accel) {
+  if (accel) {
+    this->stepper->move(steps);
+    this->stepper->runToPosition();
+  }
+  else {
+    for (int i = 0; i < steps; i++) {
+      this->singleStep(this->speedDelay);
+    }
   }
 }
 
 // Rotate the spool by a number of degrees
 // ```float degrees``` : degrees to rotate
-void Spool::rotateDegrees(float degrees) {
+void Spool::rotateDegrees(float degrees, bool accel) {
   float steps = degrees * (this->stepsPerRevolution / 360);
-  this->rotateSteps(steps);
+  this->rotateSteps(steps, accel);
 }
 
 // Rotate the spool by a distance
 // ```float distance``` : distance to rotate
-void Spool::rotateDistance(float distance) {
+void Spool::rotateDistance(float distance, bool accel) {
   float steps = distance * (this->stepsPerRevolution / (this->spoolDiameter * PI));
-  this->rotateSteps(steps);
+  this->rotateSteps(steps, accel);
 }

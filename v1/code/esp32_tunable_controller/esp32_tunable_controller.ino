@@ -34,7 +34,7 @@
 
 #define STALL_PIN        36
 
-#define fullTurn 51200 // 200 * 256 = 51200
+#define fullTurn 1600 // 200 * 8 = 1600
 
 Spool* spool = new Spool(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
 
@@ -53,11 +53,12 @@ void setup() {
   Serial.print("DRV conn test = ");
   Serial.println(spool->testConnection());
 
-  spool->setDir(0); // 0 counter-clockwise, 1 clockwise
-  spool->setSpeed(1);
+  // spool->setDir(0); // 0 counter-clockwise, 1 clockwise
+  // spool->setSpeed(60);
+  // spool->setAcceleration(1);
 }
 
 void loop() {
-  spool->rotateDegrees(360);
-  delay(1000);
+  spool->rotateSteps(fullTurn, true);
+  delay(5000);
 }
