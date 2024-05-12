@@ -8,13 +8,12 @@
  * by using the CAT protocol of an FLRig server.
  * 
  * 
- * @author ON4PFD
+ * @author Frédéric Druppel - ON4PFD
  * @date 2024-05-08
  * @version 1.0
  */
 
 
-// TODO : dynamics handling (speedup, slowdown, ...)
 // TODO : homing/retract sequence
 // TODO : state machine
 // TODO : web interface
@@ -34,7 +33,7 @@
 
 #define STALL_PIN        36
 
-#define fullTurn 1600 // 200 * 8 = 1600
+int fullTurn;
 
 Spool* spool = new Spool(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK, STEP_PIN, DIR_PIN, EN_PIN, STALL_PIN);
 
@@ -45,20 +44,26 @@ void setup() {
   while(!Serial);
   Serial.println("Starting");
   (*spool).begin(); // Dereference the spool pointer before calling the begin() function
-  spool->setCurrent(1000);
+  spool->setCurrent(500);
+  spool->setMicroSteps(8);
+  spool->setStepperStepsPerRevolution(200);
+  spool->setDiameter(100);
+  spool->setWidth(20);
   spool->enable();
+
+  fullTurn = spool->getStepsPerRevolution();
 
   Serial.print("DRV_STATUS=0b");
   Serial.println(spool->getDRVStatus(), BIN);
   Serial.print("DRV conn test = ");
   Serial.println(spool->testConnection());
 
-  // spool->setDir(0); // 0 counter-clockwise, 1 clockwise
-  // spool->setSpeed(60);
-  // spool->setAcceleration(1);
+  spool->setDir(0); // 0 counter-clockwise, 1 clockwise
+  spool->setSpeed(60);
+  spool->setAcceleration(60);
 }
 
 void loop() {
-  spool->rotateSteps(fullTurn, true);
+  spool->rotateDegrees(360);
   delay(5000);
 }

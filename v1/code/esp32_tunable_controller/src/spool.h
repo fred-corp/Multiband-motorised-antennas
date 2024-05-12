@@ -17,23 +17,28 @@ class Spool
     void disable();
     virtual uint32_t getDRVStatus();
     uint8_t testConnection();
+    void invertDir();
     void setDiameter(float diameter);
     float getDiameter();
     void setWidth(float width);
     float getWidth();
-    void setStepsPerRevolution(int steps);
+    void setMicroSteps(int microSteps);
+    void setStepperStepsPerRevolution(int steps);
     int getStepsPerRevolution();
     void setDir(bool dir);
     void singleStep(int delay);
     void setSpeed(float speed);
     void setAcceleration(int acceleration);
-    void rotateSteps(int steps, bool accel = true);
-    void rotateDegrees(float degrees, bool accel = true);
-    void rotateDistance(float distance, bool accel = true);
+    void rotateSteps(int steps);
+    void rotateDegrees(float degrees);
+    void rotateDistance(float distance);
   private:
+    bool invDir;
     float spoolDiameter;
     float spoolWidth;
-    int stepsPerRevolution;
+    int microSteps;
+    int stepperStepsPerRevolution;
+    int microStepsPerRevolution;
     TMC2130Stepper *driver;
     AccelStepper *stepper;
     uint16_t step_pin;
@@ -42,9 +47,7 @@ class Spool
     uint16_t stall_pin;
     bool dir;
     int speed;
-    int speedDelay;
     float acceleration;
-    int startDelay;
 };
 
 #endif
